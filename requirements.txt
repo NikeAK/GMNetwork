@@ -1,0 +1,8 @@
+curl-cffi==0.6.2
+inquirer==3.2.4
+web3==6.16.0
+loguru==0.7.2
+pyfiglet==1.0.2
+better_proxy==1.1.5
+tqdm==4.66.4
+eth-account
