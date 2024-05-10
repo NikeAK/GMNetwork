@@ -24,7 +24,7 @@
 | **RATELIMIT_SLEEP**   | Время сна, после превышения лимита запросов - [min, max]        |
 
 $\color{#58A6FF}\textsf{\Large\&#x24D8;\kern{0.2cm}\normalsize Note}$
-**Перед началом работы, заполните $\color{yellow}{\textsf{private_keys.txt}}$ и $\color{yellow}{\textsf{proxy.txt}}$ 1к1!**
+**Перед началом работы, заполните $\color{yellow}{\textsf{private-keys.txt}}$ и $\color{yellow}{\textsf{proxy.txt}}$ 1к1!**
 
 ## ⚡️Быстрый запуск
 1. Запустите $\color{orange}{\textsf{Setup.bat}}$. Этот скрипт автоматически создаст виртуальное окружение, активирует его, установит все необходимые зависимости из файла requirements.txt и удалит не нужные файлы.
