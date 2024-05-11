@@ -1,4 +1,4 @@
-# SuperSight
+# GM Network
 [![Telegram channel](https://img.shields.io/endpoint?url=https://runkit.io/damiankrawczyk/telegram-badge/branches/master?url=https://t.me/oxcode1)](https://t.me/oxcode1)
 
 ✈️[Telegram Channel](https://t.me/oxcode1)
