@@ -8,4 +8,5 @@ tqdm==4.66.4
 pandas==2.2.2
 SQLAlchemy==2.0.30
 openpyxl==3.1.2
+git+https://github.com/NikeAK/tweepy-self.git
 eth-account

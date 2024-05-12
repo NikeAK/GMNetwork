@@ -88,7 +88,7 @@ class GMNetwork:
             self.status = answer['result']['user_info']['status']
             return answer
         else:
-            logger.error(f'Поток {self.thread} | Не удалось установить реферальный код | <r>ERROR: {answer["error_message"]}</r>')
+            logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт | <r>ERROR: {answer["error_message"]}</r>')
             return None
 
     async def enter_refcode(self, refcode: str) -> bool:
@@ -174,9 +174,13 @@ class GMNetwork:
         return task_daily['last_check_in_time']
     
     async def claim_launchpad_tasks(self):
-        tasks = (await self.get_tasks())['launchpad_tasks_info']
+        dict_tasks = await self.get_tasks()
+        ban_task = ['903134427647086764', '903134427605143942']
+        all_tasks = dict_tasks['questn_tasks_info'] + dict_tasks['launchpad_tasks_info']
 
-        for task in tasks:
+        for task in all_tasks:
+            if task['id'] in ban_task:
+                continue
             if not task['user_done_status']:
                 payload = {
                     "task_id": task['id'],
@@ -197,7 +201,7 @@ class GMNetwork:
                     answer = response.json()
 
                     if answer['success'] and answer['result']:
-                        logger.success(f'Поток {self.thread} | Задание <c>{task['title']}</c> выполнено <g>+{int(task["energy"])}</g>$GN')
+                        logger.success(f'Поток {self.thread} | Задание <c>{task["title"]}</c> выполнено <g>+{int(task["energy"])}</g>$GN')
 
                     else:
                         logger.error(f'Поток {self.thread} | Ошибка при выполнении задания <c>{task["title"]}</c>')

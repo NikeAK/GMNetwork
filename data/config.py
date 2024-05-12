@@ -1,17 +1,19 @@
-#-------------------------------------- Settings --------------------------------------
+#-------------------------------------- Settings ------------------------------------------------
 
-REFERRAL_CODE = 'KI5W'      # Реферальный код
+REFERRAL_CODE = 'KI5W'                  # Реферальный код
 
-USE_PROXY = True            # Использовать прокси? - True/False
-LOGGER_PROXY = False        # Вывод информацию о статусе прокси - True/False
+DO_QUESTN = False                       # Квесты QuestN (требуются твиттер) - True/False
+BNB_RPC = 'https://rpc.ankr.com/bsc'    # Провайдер bnb
 
+USE_PROXY = True                        # Использовать прокси? - True/False
+LOGGER_PROXY = False                    # Вывод информацию о статусе прокси - True/False
 
-REQUESTSERROR_ATTEMPTS = 7  # Максимальное число попыток неудачных запросов
-RATELIMIT_SLEEP = [35, 60]  # Время сна, после превышения лимита запросов - [min, max]
+REQUESTSERROR_ATTEMPTS = 7              # Максимальное число попыток неудачных запросов
+RATELIMIT_SLEEP = [35, 60]              # Время сна, после превышения лимита запросов - [min, max]
 
-PROXY_CHEKER_TIMEOUT = 5    # Тайм-аут для проверки прокси
+PROXY_CHEKER_TIMEOUT = 5                # Тайм-аут для проверки прокси
 
-#-------------------------------------- Export --------------------------------------
+#-------------------------------------- Export -----------------------------------------------------
 '''
 Доступные данные для экспорта:
 
@@ -19,12 +21,17 @@ id                  - Номер аккаунта в БД
 
 address             - Адресс кошелька EVM
 privatekey          - Приватный ключ EVM
+twitter_token       - Твиттер auth_token
 proxy               - Прокси привязанный к аккаунты
 
-id_gm               - Номер аккаунта в GM Network
+balance_bnb         - Баланс в сети bnb
+claim_mission       - QuestN GM Mission ❌✅
+claim_network       - QuestN GM Network ❌✅
+
 checkin             - Последний CHECK-IN ❌✅
 balance             - Баланс аккаунта
 
+id_gm               - Номер аккаунта в GM Network
 email               - Email привязанный к аккаунту (...)
 invite_code         - Реферальный код у аккаунта
 
