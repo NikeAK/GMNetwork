@@ -65,6 +65,8 @@ class TaskManager:
                         private_key = self.private_keys.pop(0)
                 
                 if self.__db.get_account_by_pv(private_key) is not None:
+                    async with self.lock:
+                        FileManager.delete_str_file('data/private_keys.txt', private_key)
                     logger.warning(f"Поток {thread} | Приватный ключ {private_key} уже в БД! Пропускаю...")
                     continue
                 
