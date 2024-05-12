@@ -55,8 +55,11 @@ class TaskManager:
                         return 'noaccounts'
                     account: Accounts = self.accounts_db.pop(0)
                 
-                result = await GMNetwork(thread, account).quick_start(self.refcodes[self.counter_refcode % len(self.refcodes)])
-                self.counter_refcode += 1
+                async with self.lock:
+                    referral_code = self.refcodes[self.counter_refcode % len(self.refcodes)]
+                    self.counter_refcode += 1
+
+                result = await GMNetwork(thread, account).quick_start(referral_code)
                 self.__db.update_account(account.privatekey, result)
             else:
                 async with self.lock:
@@ -94,8 +97,11 @@ class TaskManager:
                     async with self.lock:
                         FileManager.delete_str_file('data/private_keys.txt', private_key)
 
-                result = await GMNetwork(thread, account).quick_start(self.refcodes[self.counter_refcode % len(self.refcodes)])
-                self.counter_refcode += 1
+                async with self.lock:
+                    referral_code = self.refcodes[self.counter_refcode % len(self.refcodes)]
+                    self.counter_refcode += 1
+
+                result = await GMNetwork(thread, account).quick_start(referral_code)
                 self.__db.update_account(account.privatekey, result)
 
             logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey[:6]}...{account.privatekey[60:]}")
