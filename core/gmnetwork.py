@@ -61,12 +61,11 @@ class GMNetwork:
                     continue
             except RequestsError as error:
                 logger.error(f'Поток {self.thread} | <r>RequestsError: {error}</r>, попытка <y>{attempt}</y>/<r>{REQUESTSERROR_ATTEMPTS+1}</r> сплю 10 сек.')
-                await asyncio.sleep(10)
             else:
                 return response
         else:
             logger.error(f'Поток {self.thread} | Превышено максимальное количество попыток - <r>{REQUESTSERROR_ATTEMPTS}</r>')
-            raise TimeoutError
+            raise RequestsError('I think bad proxy')
 
     async def login(self) -> dict | None:
         timestamp = GMNetwork.get_unix_timestamp()
@@ -251,6 +250,6 @@ class GMNetwork:
             
             logger.info(f'Поток {self.thread} | Баланс: <g>{balance}</g>$GN')
             return data
-        except TimeoutError:
+        except RequestsError:
             return None
 
