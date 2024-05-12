@@ -63,22 +63,21 @@ class TaskManager:
                         return 'nokeys'
                     else:
                         private_key = self.private_keys.pop(0)
-                
-                if self.__db.get_account_by_pv(private_key) is not None:
-                    async with self.lock:
-                        FileManager.delete_str_file('data/private_keys.txt', private_key)
-                    logger.warning(f"Поток {thread} | Приватный ключ {private_key} уже в БД! Пропускаю...")
-                    continue
-                
-                proxy, t_proxy = await self.get_proxy(thread) if USE_PROXY else None
 
-                account = Accounts(
-                    address = eth_account.Account.from_key(private_key).address,
-                    privatekey=private_key,
-                    proxy=proxy
-                )
+                account = self.__db.get_account_by_pv(private_key)
 
-                self.__db.add_account(account)
+                if account is None:
+                    proxy, t_proxy = await self.get_proxy(thread) if USE_PROXY else None
+
+                    account = Accounts(
+                        address = eth_account.Account.from_key(private_key).address,
+                        privatekey=private_key,
+                        proxy=proxy
+                    )
+
+                    self.__db.add_account(account)
+                else:
+                    logger.warning(f'Поток {thread} | Аккаунт найден в БД! Задания будут выполнены повторно.')
 
                 async with self.lock:
                     FileManager.delete_str_file('data/private_keys.txt', private_key)

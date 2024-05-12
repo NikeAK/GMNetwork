@@ -87,7 +87,7 @@ class CLInterface:
 
         logger.info(f'📥  Аккаунтов загружено - [{accounts}]\n')
 
-        if USE_PROXY:
+        if USE_PROXY and answer != 'DataBase':
             proxy = len(FileManager.read_file('data/proxy.txt'))
             if proxy == 0:
                 logger.error(f'Проверьте файл с прокси! Прокси не найдено!')
