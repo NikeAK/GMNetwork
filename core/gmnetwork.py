@@ -15,6 +15,7 @@ from data.config import RATELIMIT_SLEEP, REQUESTSERROR_ATTEMPTS
 class GMNetwork:
     def __init__(self, thread: int, account: Accounts) -> None:
         self.thread = thread
+        self.account = account
         self.status = 0
 
         headers = {
@@ -31,8 +32,8 @@ class GMNetwork:
             'Sec-Fetch-Site': 'same-site',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
-        self.session = AsyncSession(impersonate="chrome124", proxy=account.proxy, headers=headers)
-        self.w3u = Web3Utils('https://rpc.ankr.com/eth', account.privatekey, account.proxy)
+        self.session = AsyncSession(impersonate="chrome124", proxy=self.account.proxy, headers=headers)
+        self.w3u = Web3Utils('https://rpc.ankr.com/eth', self.account.privatekey, self.account.proxy)
     
     @staticmethod
     def get_unix_timestamp() -> int:
@@ -85,11 +86,11 @@ class GMNetwork:
 
         if answer['success']:
             self.session.headers['Access-Token'] = answer['result']['access_token']
-            logger.success(f'Поток {self.thread} | Выполнен вход - ID: {answer["result"]["user_info"]["id"]}, Privatekey: {self.w3u.private_key[:6]}...{self.w3u.private_key[60:]}')
+            logger.success(f'Поток {self.thread} | Выполнен вход - ID: {answer["result"]["user_info"]["id"]}, Privatekey: {self.account.privatekey[:6]}...{self.account.privatekey[60:]}')
             self.status = answer['result']['user_info']['status']
             return answer
         else:
-            logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт, Privatekey: {self.w3u.private_key[:6]}...{self.w3u.private_key[60:]} | <r>ERROR: {answer["error_message"]}</r>')
+            logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт, Privatekey: {self.account.privatekey[:6]}...{self.account.privatekey[60:]} | <r>ERROR: {answer["error_message"]}</r>')
             return None
 
     async def enter_refcode(self, refcode: str) -> bool:
@@ -214,9 +215,9 @@ class GMNetwork:
                 logger.info(f'Поток {self.thread} | Сплю {t_sleep}сек. ')
                 await asyncio.sleep(t_sleep)
 
-    async def quick_start(self, refcode: str) -> dict:
+    async def quick_start(self) -> dict:
         await self.login()
-        await self.enter_refcode(refcode)
+        await self.enter_refcode(self.account.refcode)
         
         while True:
             if await self.set_agent():break
