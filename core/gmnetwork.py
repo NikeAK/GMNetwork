@@ -173,13 +173,13 @@ class GMNetwork:
             logger.info(f'Поток {self.thread} | Daily CHECK-IN через <y>{(86400 - delta_time) / 60 / 60:.2f}</y> часа')
         return task_daily['last_check_in_time']
     
-    async def claim_launchpad_tasks(self):
+    async def claim_tasks(self):
         dict_tasks = await self.get_tasks()
-        ban_task = ['903134427647086764', '903134427605143942']
+        this_tasks = ['903134427382845867', '903134427458343407', '903134427496092045', '903134427529646177', '903134427571589375']
         all_tasks = dict_tasks['questn_tasks_info'] + dict_tasks['launchpad_tasks_info']
 
         for task in all_tasks:
-            if task['id'] in ban_task:
+            if task['id'] not in this_tasks:
                 continue
             if not task['user_done_status']:
                 payload = {
@@ -222,7 +222,7 @@ class GMNetwork:
 
         checkin = await self.claim_daily()
         
-        await self.claim_launchpad_tasks()
+        await self.claim_tasks()
 
         balance = await self.get_balance()
         user_info = await self.get_user_info()

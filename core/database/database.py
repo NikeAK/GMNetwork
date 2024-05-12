@@ -21,9 +21,10 @@ class MainDB():
             self.__session.refresh(account)
         return accounts
     
-    def get_account_by_id(self, acc_id: int ) -> Accounts:
-        account = self.__session.query(Accounts).filter_by(id=acc_id).first()
-        self.__session.refresh(account)
+    def get_account_by_pv(self, private_key: int) -> Accounts:
+        account = self.__session.query(Accounts).filter_by(privatekey=private_key).first()
+        if account is not None:
+            self.__session.refresh(account)
         return account
 
     def add_account(self, acc: Accounts) -> None:

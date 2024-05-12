@@ -11,9 +11,11 @@ class Accounts(Base):
 
     address: Mapped[str] = mapped_column(nullable=True)
     privatekey: Mapped[str]
+
     balance_bnb: Mapped[float] = mapped_column(nullable=True)
     claim_mission: Mapped[bool] = mapped_column(default=False)
     claim_network: Mapped[bool] = mapped_column(default=False)
+    
     twitter_token: Mapped[str] = mapped_column(nullable=True)
     proxy: Mapped[str]
 

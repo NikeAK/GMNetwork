@@ -64,6 +64,10 @@ class TaskManager:
                     else:
                         private_key = self.private_keys.pop(0)
                 
+                if self.__db.get_account_by_pv(private_key) is not None:
+                    logger.warning(f"Поток {thread} | Приватный ключ {private_key} уже в БД! Пропускаю...")
+                    continue
+                
                 proxy, t_proxy = await self.get_proxy(thread) if USE_PROXY else None
 
                 account = Accounts(
@@ -105,7 +109,7 @@ class TaskManager:
                     else:
                         data += str(getattr(account, export)) + EXPORT_SEPARATOR
                 data = data[:-len(EXPORT_SEPARATOR)] + '\n'
-                logger.info(f"Аккаунт {account.privatekey} экспортирован!")
+                logger.info(f"Аккаунт <g>{account.privatekey}</g> экспортирован!")
             FileManager.save_data('data/export/wallets.txt', data)
             logger.success(f"Успешно экспортировано <g>{len(accounts)}</g> кошельков, сохранил по пути -> <c>data/export/wallets.txt</c>")
         else:
