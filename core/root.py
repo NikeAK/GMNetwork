@@ -41,7 +41,8 @@ class Core:
 
         messages = {
             'nokeys': "Список приватных ключей отбработан",
-            'noaccounts': "Список аккаунтов БД отбработан"
+            'noaccounts': "Список аккаунтов БД отбработан",
+            'noproxy': "Список прокси пуст!!!"
         }
 
         for flag, message in messages.items():

@@ -77,7 +77,7 @@ class CLInterface:
             )
         ]
 
-        answer = (inquirer.prompt(menu)['menu_item'])
+        answer = (inquirer.prompt(menu, raise_keyboard_interrupt=True)['menu_item'])
         
         accounts = MainDB().count_accounts() if 'DataBase' in answer == 'Launch DataBase' else len(FileManager.read_file('data/private_keys.txt'))
 

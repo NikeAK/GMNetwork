@@ -14,7 +14,7 @@ from core.database.models import Accounts
 from data.config import (
     USE_PROXY, LOGGER_PROXY, 
     EXPORT_DATA, EXPORT_SEPARATOR, 
-    PROXY_CHEKER_TIMEOUT, REFERRAL_CODE
+    PROXY_CHEKER_TIMEOUT
 )
 
 
@@ -22,18 +22,20 @@ class TaskManager:
     def __init__(self) -> None:
         self.private_keys = FileManager.read_file('data/private_keys.txt')
         self.proxies = FileManager.read_file('data/proxy.txt')
+        self.refcodes = FileManager.read_file('data/referral_code.txt')
 
         self.__db = MainDB()
         self.accounts_db = self.__db.get_accounts()
 
         self.lock = asyncio.Lock()
-        self.counter = 0
+        self.counter_refcode = 0
     
     async def get_proxy(self, thread: int) -> str:
         while True:
             async with self.lock:
-                pop_proxy: str = self.proxies[self.counter % len(self.proxies)]
-                self.counter += 1
+                if not self.proxies:
+                    return None, None
+                pop_proxy: str = self.proxies.pop(0)
             proxy = Proxy.from_str(pop_proxy if pop_proxy.startswith('http://') else 'http://' + pop_proxy).as_url
             
             if not await check_proxy(proxy, PROXY_CHEKER_TIMEOUT):
@@ -53,10 +55,9 @@ class TaskManager:
                         return 'noaccounts'
                     account: Accounts = self.accounts_db.pop(0)
                 
-                result = await GMNetwork(thread, account).quick_start(REFERRAL_CODE)
+                result = await GMNetwork(thread, account).quick_start(self.refcodes[self.counter_refcode % len(self.refcodes)])
+                self.counter_refcode += 1
                 self.__db.update_account(account.privatekey, result)
-
-                logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey}")
             else:
                 async with self.lock:
                     if not self.private_keys:
@@ -67,7 +68,12 @@ class TaskManager:
                 account = self.__db.get_account_by_pv(private_key)
 
                 if account is None:
-                    proxy, t_proxy = await self.get_proxy(thread) if USE_PROXY else None
+                    if USE_PROXY:
+                        proxy, t_proxy = await self.get_proxy(thread)
+                        if proxy == None:
+                            return 'noproxy'
+                    else:
+                        proxy = None
 
                     account = Accounts(
                         address = eth_account.Account.from_key(private_key).address,
@@ -76,6 +82,8 @@ class TaskManager:
                     )
 
                     self.__db.add_account(account)
+
+                    logger.info(f'Поток {thread} | Аккаунт добавлен в БД! PrivateKey: {account.privatekey[:6]}...{account.privatekey[60:]}')
 
                     async with self.lock:
                         FileManager.delete_str_file('data/private_keys.txt', private_key)
@@ -86,10 +94,11 @@ class TaskManager:
                     async with self.lock:
                         FileManager.delete_str_file('data/private_keys.txt', private_key)
 
-                result = await GMNetwork(thread, account).quick_start(REFERRAL_CODE)
+                result = await GMNetwork(thread, account).quick_start(self.refcodes[self.counter_refcode % len(self.refcodes)])
+                self.counter_refcode += 1
                 self.__db.update_account(account.privatekey, result)
 
-                logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey}")
+            logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey[:6]}...{account.privatekey[60:]}")
     
     async def generate_wallets(self, thread: int, count: int) -> None:
         with tqdm(total=count) as pbar:

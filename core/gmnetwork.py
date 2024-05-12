@@ -57,6 +57,7 @@ class GMNetwork:
                     t_sleep = random.randint(RATELIMIT_SLEEP[0], RATELIMIT_SLEEP[1])
                     logger.error(f'Поток {self.thread} | <r>RateLimit Request</r>, сплю {t_sleep} сек.')
                     await asyncio.sleep(t_sleep)
+                    continue
             except RequestsError as error:
                 logger.error(f'Поток {self.thread} | <r>RequestsError: {error}</r>, попытка <y>{attempt}</y>/<r>{REQUESTSERROR_ATTEMPTS+1}</r> сплю 10 сек.')
                 await asyncio.sleep(10)
@@ -84,11 +85,11 @@ class GMNetwork:
 
         if answer['success']:
             self.session.headers['Access-Token'] = answer['result']['access_token']
-            logger.success(f'Поток {self.thread} | Выполнен вход - ID: {answer["result"]["user_info"]["id"]}, Address: {self.w3u.address}')
+            logger.success(f'Поток {self.thread} | Выполнен вход - ID: {answer["result"]["user_info"]["id"]}, Privatekey: {self.w3u.private_key[:6]}...{self.w3u.private_key[60:]}')
             self.status = answer['result']['user_info']['status']
             return answer
         else:
-            logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт | <r>ERROR: {answer["error_message"]}</r>')
+            logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт, Privatekey: {self.w3u.private_key[:6]}...{self.w3u.private_key[60:]} | <r>ERROR: {answer["error_message"]}</r>')
             return None
 
     async def enter_refcode(self, refcode: str) -> bool:

@@ -1,7 +1,5 @@
 #-------------------------------------- Settings ------------------------------------------------
 
-REFERRAL_CODE = 'KI5W'                  # Реферальный код
-
 DO_QUESTN = False                       # Квесты QuestN (требуются твиттер) - True/False
 BNB_RPC = 'https://rpc.ankr.com/bsc'    # Провайдер bnb
 
