@@ -40,25 +40,18 @@ class Core:
         res = await asyncio.gather(*tasks)
 
         messages = {
-            'notoken': "Список TwitterToken пуст!",
-            'noaccounts': "Аккаунты БД отработаны!",
-            'endexport': "Аккаунты БД экспортированы!",
-            'noproxy': "Список Proxy пуст!"
+            'nokeys': "Список приватных ключей отбработан",
+            'noaccounts': "Список аккаунтов БД отбработан"
         }
 
-        if any(flag in res for flag in messages):
-            for flag, message in messages.items():
-                if flag in res:
-                    logger.info(f"Все потоки завершены | {message}")
-                    break
+        for flag, message in messages.items():
+            if flag in res:
+                logger.info(f"Все потоки завершены | {message}")
+                break
                 
     @async_start
-    def task_setup_launch(self, threads: int):
-        return Core.setup_task(threads, 'launch')
-        
-    @async_start
-    def task_setup_register(self, threads: int):
-        return Core.setup_task(threads, 'register')
+    def task_setup_launch(self, threads: int, *args):
+        return Core.setup_task(threads, 'launch', *args)
     
     @async_start
     def task_setup_generate(self, threads: int, *args):
@@ -66,5 +59,5 @@ class Core:
 
     @async_start
     def task_setup_export(self, threads: int, *args):
-        return Core.setup_task(threads, 'export', *args)
+        return Core.setup_task(threads, 'export_info', *args)
 

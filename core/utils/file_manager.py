@@ -20,6 +20,6 @@ class FileManager:
             
     @staticmethod
     def save_data(path: str, data: str):
-        with open(path, 'w') as file:
+        with open(path, 'w', encoding="utf-8") as file:
             file.write(data)
 
