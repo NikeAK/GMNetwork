@@ -56,7 +56,8 @@ class TaskManager:
                     account: Accounts = self.accounts_db.pop(0)
 
                 result = await GMNetwork(thread, account).quick_start()
-                self.__db.update_account(account.privatekey, result)
+                if result is not None:
+                    self.__db.update_account(account.privatekey, result)
             else:
                 async with self.lock:
                     if not self.private_keys:
@@ -100,7 +101,9 @@ class TaskManager:
                         FileManager.delete_str_file('data/private_keys.txt', private_key)
 
                 result = await GMNetwork(thread, account).quick_start()
-                self.__db.update_account(account.privatekey, result)
+                
+                if result is not None:
+                    self.__db.update_account(account.privatekey, result)
 
             logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey[:6]}...{account.privatekey[60:]}")
     

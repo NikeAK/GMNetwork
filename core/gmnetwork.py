@@ -66,6 +66,7 @@ class GMNetwork:
                 return response
         else:
             logger.error(f'Поток {self.thread} | Превышено максимальное количество попыток - <r>{REQUESTSERROR_ATTEMPTS}</r>')
+            raise TimeoutError
 
     async def login(self) -> dict | None:
         timestamp = GMNetwork.get_unix_timestamp()
@@ -216,36 +217,40 @@ class GMNetwork:
                 await asyncio.sleep(t_sleep)
 
     async def quick_start(self) -> dict:
-        await self.login()
-        await self.enter_refcode(self.account.refcode)
-        
-        while True:
-            if await self.set_agent():break
+        try:
+            await self.login()
+            await self.enter_refcode(self.account.refcode)
+            
+            while True:
+                if await self.set_agent():break
 
-        checkin = await self.claim_daily()
-        
-        await self.claim_tasks()
+            checkin = await self.claim_daily()
+            
+            await self.claim_tasks()
 
-        balance = await self.get_balance()
-        user_info = await self.get_user_info()
+            balance = await self.get_balance()
+            user_info = await self.get_user_info()
 
-        data = {
-            'id_gm': user_info['id'],
-            'email': user_info['email'],
-            'checkin': int(checkin),
-            'balance': int(balance),
-            'invite_code': user_info['invite_code'],
-            'agent_id': user_info['agent']['id'],
-            'agent_nft_id': user_info['agent']['nft_id'],
-            'agent_token_id': user_info['agent']['token_id'],
-            'agent_name': user_info['agent']['name'],
-            'agent_description': user_info['agent']['description'],
-            'agent_image': user_info['agent']['image'],
-            'agent_rarity': user_info['agent']['rarity'],
-            'agent_energy': user_info['agent']['energy'],
-            'boost': user_info['boost'],
-            'level': user_info['level']
-        }
-        
-        logger.info(f'Поток {self.thread} | Баланс: <g>{balance}</g>$GN')
-        return data
+            data = {
+                'id_gm': user_info['id'],
+                'email': user_info['email'],
+                'checkin': int(checkin),
+                'balance': int(balance),
+                'invite_code': user_info['invite_code'],
+                'agent_id': user_info['agent']['id'],
+                'agent_nft_id': user_info['agent']['nft_id'],
+                'agent_token_id': user_info['agent']['token_id'],
+                'agent_name': user_info['agent']['name'],
+                'agent_description': user_info['agent']['description'],
+                'agent_image': user_info['agent']['image'],
+                'agent_rarity': user_info['agent']['rarity'],
+                'agent_energy': user_info['agent']['energy'],
+                'boost': user_info['boost'],
+                'level': user_info['level']
+            }
+            
+            logger.info(f'Поток {self.thread} | Баланс: <g>{balance}</g>$GN')
+            return data
+        except TimeoutError:
+            return None
+
