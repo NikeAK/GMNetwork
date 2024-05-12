@@ -76,12 +76,12 @@ class TaskManager:
                     )
 
                     self.__db.add_account(account)
+                    
+                    async with self.lock:
+                        FileManager.delete_str_file('data/private_keys.txt', private_key)
+                        FileManager.delete_str_file('data/proxy.txt', t_proxy)
                 else:
                     logger.warning(f'Поток {thread} | Аккаунт найден в БД! Задания будут выполнены повторно.')
-
-                async with self.lock:
-                    FileManager.delete_str_file('data/private_keys.txt', private_key)
-                    FileManager.delete_str_file('data/proxy.txt', t_proxy)
 
                 result = await GMNetwork(thread, account).quick_start(REFERRAL_CODE)
                 self.__db.update_account(account.privatekey, result)
