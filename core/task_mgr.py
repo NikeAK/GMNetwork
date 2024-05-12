@@ -54,12 +54,8 @@ class TaskManager:
                     if not self.accounts_db:
                         return 'noaccounts'
                     account: Accounts = self.accounts_db.pop(0)
-                
-                async with self.lock:
-                    referral_code = self.refcodes[self.counter_refcode % len(self.refcodes)]
-                    self.counter_refcode += 1
 
-                result = await GMNetwork(thread, account).quick_start(referral_code)
+                result = await GMNetwork(thread, account).quick_start()
                 self.__db.update_account(account.privatekey, result)
             else:
                 async with self.lock:
@@ -74,14 +70,20 @@ class TaskManager:
                     if USE_PROXY:
                         proxy, t_proxy = await self.get_proxy(thread)
                         if proxy == None:
+                            self.private_keys.append(private_key)
                             return 'noproxy'
                     else:
                         proxy = None
 
+                    async with self.lock:
+                        referral_code = self.refcodes[self.counter_refcode % len(self.refcodes)]
+                        self.counter_refcode += 1
+
                     account = Accounts(
                         address = eth_account.Account.from_key(private_key).address,
                         privatekey=private_key,
-                        proxy=proxy
+                        proxy=proxy,
+                        refcode=referral_code
                     )
 
                     self.__db.add_account(account)
@@ -97,11 +99,7 @@ class TaskManager:
                     async with self.lock:
                         FileManager.delete_str_file('data/private_keys.txt', private_key)
 
-                async with self.lock:
-                    referral_code = self.refcodes[self.counter_refcode % len(self.refcodes)]
-                    self.counter_refcode += 1
-
-                result = await GMNetwork(thread, account).quick_start(referral_code)
+                result = await GMNetwork(thread, account).quick_start()
                 self.__db.update_account(account.privatekey, result)
 
             logger.info(f"Поток {thread} | Завершил работу с аккаунтом - PrivateKey: {account.privatekey[:6]}...{account.privatekey[60:]}")

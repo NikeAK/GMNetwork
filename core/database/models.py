@@ -16,6 +16,7 @@ class Accounts(Base):
     claim_mission: Mapped[bool] = mapped_column(nullable=True)
     claim_network: Mapped[bool] = mapped_column(nullable=True)
     
+    refcode: Mapped[str]
     twitter_token: Mapped[str] = mapped_column(nullable=True)
     proxy: Mapped[str]
 
