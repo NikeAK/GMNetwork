@@ -38,9 +38,10 @@ class TaskManager:
                 pop_proxy: str = self.proxies.pop(0)
             proxy = Proxy.from_str(pop_proxy if pop_proxy.startswith('http://') else 'http://' + pop_proxy).as_url
             
-            if not await check_proxy(proxy, PROXY_CHEKER_TIMEOUT):
+            status, message = await check_proxy(proxy, PROXY_CHEKER_TIMEOUT)
+            if not status:
                 if LOGGER_PROXY:
-                    logger.error(f"Поток {thread} | <r>BadProxy</r> {pop_proxy}")
+                    logger.error(f"Поток {thread} | <r>BadProxy: {message}</r> {pop_proxy}")
                 continue
             else:
                 if LOGGER_PROXY:
