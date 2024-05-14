@@ -61,6 +61,7 @@ class GMNetwork:
                     continue
             except RequestsError as error:
                 logger.error(f'Поток {self.thread} | <r>RequestsError: {error}</r>, попытка <y>{attempt}</y>/<r>{REQUESTSERROR_ATTEMPTS+1}</r> сплю 10 сек.')
+                await asyncio.sleep(10)
             else:
                 return response
         else:
