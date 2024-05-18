@@ -15,6 +15,8 @@ def async_start(func):
             asyncio.run(func(self, *args, **kwargs))
         except KeyboardInterrupt:
             logger.critical("Прервано пользователем")
+        except Exception as error:
+            logger.critical(f"Непредвиденная ошибка: {error}")
     return wrapper
 
 

@@ -26,6 +26,7 @@ id                  - Номер аккаунта в БД
 
 address             - Адресс кошелька EVM
 privatekey          - Приватный ключ EVM
+access_token        - Токен авторизации
 
 refcode             - Рефкод, который использовался при регистрации
 twitter_token       - Твиттер auth_token
