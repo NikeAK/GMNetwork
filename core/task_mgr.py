@@ -82,7 +82,7 @@ class TaskManager:
                         self.counter_refcode += 1
 
                     account = Accounts(
-                        address = eth_account.Account.from_key(private_key).address,
+                        address=eth_account.Account.from_key(private_key).address,
                         privatekey=private_key,
                         proxy=proxy,
                         refcode=referral_code

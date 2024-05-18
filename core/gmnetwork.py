@@ -5,6 +5,7 @@ import random
 from core.utils import logger
 from core.utils import Web3Utils
 from curl_cffi.requests import AsyncSession, Response, RequestsError
+from core.utils import Captcha
 
 from core.database.database import MainDB
 from core.database.models import Accounts
@@ -68,11 +69,14 @@ class GMNetwork:
             logger.error(f'Поток {self.thread} | Превышено максимальное количество попыток - <r>{REQUESTSERROR_ATTEMPTS}</r>')
             raise RequestsError('I think bad proxy')
 
-    async def login(self) -> dict | None:
+    async def login(self) -> str:
         timestamp = GMNetwork.get_unix_timestamp()
         text = f'Welcome to GM Launchpad.\nPlease sign this message to login GM Launchpad.\n\nTimestamp: {timestamp}'
 
         signature = self.w3u.sign_message(text)[2:]
+
+        captcha_code = await Captcha(self.thread, self.account.proxy).turnstile()
+        self.session.headers['Cf-Turnstile-Resp'] = captcha_code
 
         payload = {
             "address": self.w3u.address,
@@ -86,10 +90,11 @@ class GMNetwork:
         answer = response.json()
 
         if answer['success']:
+            del self.session.headers['Cf-Turnstile-Resp'] 
             self.session.headers['Access-Token'] = answer['result']['access_token']
             logger.success(f'Поток {self.thread} | Выполнен вход - ID: {answer["result"]["user_info"]["id"]}, Privatekey: {self.account.privatekey[:6]}...{self.account.privatekey[60:]}')
             self.status = answer['result']['user_info']['status']
-            return answer
+            return answer['result']['access_token']
         else:
             logger.error(f'Поток {self.thread} | Не удалось войти в аккаунт, Privatekey: {self.account.privatekey[:6]}...{self.account.privatekey[60:]} | <r>ERROR: {answer["error_message"]}</r>')
             return None
@@ -140,10 +145,10 @@ class GMNetwork:
         answer = response.json()
         return answer['result']
     
-    async def get_user_info(self) -> dict:
+    async def get_user_info(self) -> dict | None:
         response = await self.request('GET', 'https://api-launchpad.gmnetwork.ai/user/auth/info/')
         answer = response.json()
-        return answer['result']
+        return answer.get('result')
     
     async def get_balance(self, daily: bool = False) -> float:
         response = await self.request('GET', 'https://api-launchpad.gmnetwork.ai/energy/auth/user_energy/')
@@ -218,9 +223,16 @@ class GMNetwork:
 
     async def quick_start(self) -> dict:
         try:
-            await self.login()
+            if self.account.access_token:
+                self.session.headers['Access-Token'] = self.account.access_token
+                user_info = await self.get_user_info()
+            else:
+                user_info = None
+
+            if not user_info:
+                auth_token = await self.login()
+
             await self.enter_refcode(self.account.refcode)
-            
             while True:
                 if await self.set_agent():break
 
@@ -232,6 +244,7 @@ class GMNetwork:
             user_info = await self.get_user_info()
 
             data = {
+                'access_token': auth_token,
                 'id_gm': user_info['id'],
                 'email': user_info['email'],
                 'checkin': int(checkin),

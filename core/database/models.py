@@ -11,6 +11,7 @@ class Accounts(Base):
 
     address: Mapped[str] = mapped_column(nullable=True)
     privatekey: Mapped[str]
+    access_token: Mapped[str] = mapped_column(default='')
 
     balance_bnb: Mapped[float] = mapped_column(nullable=True)
     claim_mission: Mapped[bool] = mapped_column(nullable=True)
