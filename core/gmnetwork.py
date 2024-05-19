@@ -70,11 +70,20 @@ class GMNetwork:
             raise RequestsError('I think bad proxy')
 
     async def login(self) -> str:
+        if self.account.access_token:
+            self.session.headers['Access-Token'] = self.account.access_token
+            user_info = await self.get_user_info()
+        else:
+            user_info = None
+        
+        if user_info:
+            logger.success(f'Поток {self.thread} | Выполнен вход - ID: {user_info["id"]}, Privatekey: {self.account.privatekey[:6]}...{self.account.privatekey[60:]}')
+            self.status = user_info['status']
+            return self.account.access_token
+        
         timestamp = GMNetwork.get_unix_timestamp()
         text = f'Welcome to GM Launchpad.\nPlease sign this message to login GM Launchpad.\n\nTimestamp: {timestamp}'
-
         signature = self.w3u.sign_message(text)[2:]
-
         captcha_code = await Captcha(self.thread, self.account.proxy).turnstile()
         self.session.headers['Cf-Turnstile-Resp'] = captcha_code
 
@@ -223,14 +232,7 @@ class GMNetwork:
 
     async def quick_start(self) -> dict:
         try:
-            if self.account.access_token:
-                self.session.headers['Access-Token'] = self.account.access_token
-                user_info = await self.get_user_info()
-            else:
-                user_info = None
-
-            if not user_info:
-                auth_token = await self.login()
+            auth_token = await self.login()
 
             await self.enter_refcode(self.account.refcode)
             while True:
