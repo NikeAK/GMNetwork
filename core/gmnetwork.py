@@ -233,6 +233,8 @@ class GMNetwork:
     async def quick_start(self) -> dict:
         try:
             auth_token = await self.login()
+            if not auth_token:
+                return None
 
             await self.enter_refcode(self.account.refcode)
             while True:
